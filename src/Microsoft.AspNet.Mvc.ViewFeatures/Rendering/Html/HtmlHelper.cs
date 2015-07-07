@@ -429,7 +429,7 @@ namespace Microsoft.AspNet.Mvc.Rendering
             {
                 await RenderPartialCoreAsync(partialViewName, model, viewData, writer);
 
-                return new HtmlString(writer);
+                return new HtmlString(writer.ToString());
             }
         }
 

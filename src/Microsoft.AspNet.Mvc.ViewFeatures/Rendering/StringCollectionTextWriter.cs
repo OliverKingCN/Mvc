@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Framework.Internal;
+using Microsoft.Framework.WebEncoders;
 
 namespace Microsoft.AspNet.Mvc.Rendering
 {
@@ -28,7 +29,7 @@ namespace Microsoft.AspNet.Mvc.Rendering
         public StringCollectionTextWriter(Encoding encoding)
         {
             _encoding = encoding;
-            Buffer = new BufferEntryCollection();
+            Buffer = new BufferedHtmlContent();
         }
 
         /// <inheritdoc />
@@ -40,13 +41,12 @@ namespace Microsoft.AspNet.Mvc.Rendering
         /// <summary>
         /// A collection of entries buffered by this instance of <see cref="StringCollectionTextWriter"/>.
         /// </summary>
-        // internal for testing purposes.
-        internal BufferEntryCollection Buffer { get; }
+        public BufferedHtmlContent Buffer { get; }
 
         /// <inheritdoc />
         public override void Write(char value)
         {
-            Buffer.Add(value.ToString());
+            Buffer.Append(value.ToString());
         }
 
         /// <inheritdoc />
@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.Mvc.Rendering
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            Buffer.Add(buffer, index, count);
+            Buffer.Append(buffer, index, count);
         }
 
         /// <inheritdoc />
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.Mvc.Rendering
                 return;
             }
 
-            Buffer.Add(value);
+            Buffer.Append(value);
         }
 
         /// <inheritdoc />
@@ -99,7 +99,7 @@ namespace Microsoft.AspNet.Mvc.Rendering
         /// <inheritdoc />
         public override void WriteLine()
         {
-            Buffer.Add(Environment.NewLine);
+            Buffer.Append(Environment.NewLine);
         }
 
         /// <inheritdoc />
@@ -138,39 +138,9 @@ namespace Microsoft.AspNet.Mvc.Rendering
         }
 
         /// <inheritdoc />
-        public void CopyTo(TextWriter writer)
-        {
-            var targetStringCollectionWriter = writer as StringCollectionTextWriter;
-            if (targetStringCollectionWriter != null)
-            {
-                targetStringCollectionWriter.Buffer.Add(Buffer);
-            }
-            else
-            {
-                WriteList(writer, Buffer);
-            }
-        }
-
-        /// <inheritdoc />
-        public Task CopyToAsync(TextWriter writer)
-        {
-            var targetStringCollectionWriter = writer as StringCollectionTextWriter;
-            if (targetStringCollectionWriter != null)
-            {
-                targetStringCollectionWriter.Buffer.Add(Buffer);
-            }
-            else
-            {
-                return WriteListAsync(writer, Buffer);
-            }
-
-            return _completedTask;
-        }
-
-        /// <inheritdoc />
         public override string ToString()
         {
-            return string.Join(string.Empty, Buffer);
+            return Buffer.ToString();
         }
 
         private static void WriteList(TextWriter writer, BufferEntryCollection values)

@@ -275,7 +275,7 @@ namespace Microsoft.AspNet.Mvc.Razor
                 var stringCollectionTextWriter = writer as StringCollectionTextWriter;
                 if (stringCollectionTextWriter != null)
                 {
-                    stringCollectionTextWriter.CopyTo(tagHelperContentWrapperTextWriter);
+                    stringCollectionTextWriter.Buffer.WriteTo(tagHelperContentWrapperTextWriter, HtmlEncoder);
                 }
                 else
                 {
@@ -457,7 +457,7 @@ namespace Microsoft.AspNet.Mvc.Razor
                     }
                 }
 
-                htmlString.WriteTo(writer);
+                htmlString.WriteTo(writer, encoder);
                 return;
             }
 
